@@ -91,7 +91,7 @@ in_addr_t resolve_domain(char * domain)
     }
 }
 
-in_addr_t get_dst_addr(struct request * request)
+in_addr_t get_dst_addr(request_t * request)
 {
     if (request->atyp == IPV4) {
         return *(in_addr_t *)(&request->atyp + 1);
@@ -107,7 +107,7 @@ in_addr_t get_dst_addr(struct request * request)
     }
 }
 
-in_port_t get_dst_port(struct request * request)
+in_port_t get_dst_port(request_t * request)
 {
     if (request->atyp == IPV4) {
         return *(in_port_t *)(&request->atyp + 5);
@@ -131,12 +131,12 @@ void get_sock_addr(int sockfd, void * addr, void * port)
     if (port != 0) *(in_port_t *)port = bind_addr.sin_port;
 }
 
-void fill_bnd_addr(int remote_sockfd, struct reply * reply)
+void fill_bnd_addr(int remote_sockfd, reply_t * reply)
 {
     get_sock_addr(remote_sockfd, &reply->atyp + 1, &reply->atyp + 5);
 }
 
-int connect_to_remote(struct request * request, struct reply * reply)
+int connect_to_remote(request_t * request, reply_t * reply)
 {
     int remote_sockfd;
     remote_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -174,11 +174,11 @@ void serve(int client_sockfd)
     uint8_t recv_buff[BUFF_SIZE] = {0};
     uint8_t send_buff[BUFF_SIZE] = {0};
 
-    struct request * request;
-    struct reply * reply;
+    request_t * request;
+    reply_t * reply;
 
-    request = (struct request *)recv_buff;
-    reply = (struct reply *)send_buff;
+    request = (request_t *)recv_buff;
+    reply = (reply_t *)send_buff;
     reply->ver = VERSION;
 
     if (recv(client_sockfd, recv_buff, BUFF_SIZE, 0) <= 0) {
@@ -228,7 +228,7 @@ void serve(int client_sockfd)
     LOG_INFO("Closed remote socket.");
 }
 
-int attempt(struct credentials * credentials)
+int attempt(credentials_t * credentials)
 {
     unsigned int ulen, plen;
     char * uname;
@@ -260,7 +260,7 @@ int attempt(struct credentials * credentials)
     return 0;
 }
 
-int method_exists(struct client_hello * client_hello, uint8_t method)
+int method_exists(client_hello_t * client_hello, uint8_t method)
 {
     int i;
     for (i = 0; i < client_hello->nmethods; i++) {
@@ -276,11 +276,11 @@ int auth(int client_sockfd)
     uint8_t recv_buff[BUFF_SIZE] = {0};
     uint8_t send_buff[BUFF_SIZE] = {0};
 
-    struct client_hello * client_hello;
-    struct server_hello * server_hello;
+    client_hello_t * client_hello;
+    server_hello_t * server_hello;
 
-    client_hello = (struct client_hello *)recv_buff;
-    server_hello = (struct server_hello *)send_buff;
+    client_hello = (client_hello_t *)recv_buff;
+    server_hello = (server_hello_t *)send_buff;
     server_hello->ver = VERSION;
 
     if (recv(client_sockfd, recv_buff, BUFF_SIZE, 0) <= 0) {
@@ -314,11 +314,11 @@ int auth(int client_sockfd)
         memset(send_buff, 0, BUFF_SIZE);
 
         if (recv(client_sockfd, recv_buff, BUFF_SIZE, 0) > 0) {
-            struct credentials * credentials;
-            struct results * results;
+            credentials_t * credentials;
+            results_t * results;
 
-            credentials = (struct credentials *)recv_buff;
-            results = (struct results *)send_buff;
+            credentials = (credentials_t *)recv_buff;
+            results = (results_t *)send_buff;
             results->ver = 0x01;
 
             if (attempt(credentials)) {
@@ -348,8 +348,8 @@ void handler(int client_sockfd)
     if (auth(client_sockfd)) {
         serve(client_sockfd);
     }
-
     close(client_sockfd);
+
     LOG_INFO("Closed client socket.");
     LOG_DUMP();
 }
@@ -407,10 +407,10 @@ int create_server(in_addr_t addr, in_port_t port)
     return server_sockfd;
 }
 
-int load_users(const char * f)
+int load_users(const char * path)
 {
     FILE * fp;
-    fp = fopen(f, "r");
+    fp = fopen(path, "r");
     if (fp == 0) {
         perror("fopen error");
         return 0;
@@ -448,11 +448,12 @@ int load_users(const char * f)
             break;
         }
     } while (feof(fp) == 0);
+
+    fclose(fp);
+    user_count = i;
+
     LOG_DUMP();
     LOG_CLR();
-
-    user_count = i;
-    fclose(fp);
     return 1;
 }
 

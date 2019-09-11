@@ -48,59 +48,60 @@
 // max user count
 #define MAX_USER_COUNT 100
 
-struct client_hello {
+typedef struct {
     uint8_t ver;
     uint8_t nmethods;
     uint8_t methods[255];
-};
+} client_hello_t;
 
-struct server_hello {
+typedef struct {
     uint8_t ver;
     uint8_t method;
-};
+} server_hello_t;
 
-struct credentials {
+typedef struct {
     uint8_t ver;
     uint8_t ulen;
     char uname;
-};
+} credentials_t;
 
-struct results {
+typedef struct {
     uint8_t ver;
     uint8_t status;
-};
+} results_t;
 
-struct request {
+typedef struct {
     uint8_t ver;
     uint8_t cmd;
     uint8_t rsv;  // reserved
     uint8_t atyp; // address type
-    uint8_t addr;
-};
+} request_t;
 
-struct reply {
+typedef struct {
     uint8_t ver;
     uint8_t rep;
     uint8_t rsv;
     uint8_t atyp;
-    uint8_t addr;
-};
+} reply_t;
 
 char * inet_ntoaddr(void * addr);
 void forward(int fd1, int fd2);
 in_addr_t resolve_domain(char * domain);
-in_addr_t get_dst_addr(struct request * request);
-in_port_t get_dst_port(struct request * request);
+
+in_addr_t get_dst_addr(request_t * request);
+in_port_t get_dst_port(request_t * request);
 void get_sock_addr(int sockfd, void * addr, void * port);
-void fill_bnd_addr(int remote_sockfd, struct reply * reply);
-int connect_to_remote(struct request * request, struct reply * reply);
+void fill_bnd_addr(int remote_sockfd, reply_t * reply);
+int connect_to_remote(request_t * request, reply_t * reply);
 void serve(int client_sockfd);
-int attempt(struct credentials * credentials);
-int method_exists(struct client_hello * client_hello, uint8_t method);
+
+int attempt(credentials_t * credentials);
+int method_exists(client_hello_t * client_hello, uint8_t method);
 int auth(int client_sockfd);
+
 void handler(int client_sockfd);
 int create_server(in_addr_t addr, in_port_t port);
-int load_users(const char * f);
+int load_users(const char * path);
 void usage(char * name);
 
 #endif
