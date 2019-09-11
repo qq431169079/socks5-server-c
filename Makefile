@@ -10,7 +10,7 @@ endif
 vpath %.h inc
 vpath %.c src
 
-server: main.o logger.o
+server: main.o logger.o util.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 main.o: main.c main.h
@@ -19,5 +19,9 @@ main.o: main.c main.h
 logger.o: logger.c logger.h
 	$(CC) $(CFLAGS) $< -o $@
 
+util.o: util.c util.h
+	$(CC) $(CFLAGS) $< -o $@
+
 clean:
-	rm -f *.o server
+	rm -f server
+	rm -f *.o

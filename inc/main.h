@@ -84,10 +84,6 @@ typedef struct {
     uint8_t atyp;
 } reply_t;
 
-char * inet_ntoaddr(void * addr);
-void forward(int fd1, int fd2);
-in_addr_t resolve_domain(char * domain);
-
 in_addr_t get_dst_addr(request_t * request);
 in_port_t get_dst_port(request_t * request);
 void get_sock_addr(int sockfd, void * addr, void * port);
