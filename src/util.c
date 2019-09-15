@@ -1,5 +1,10 @@
 
+#include <stdio.h>
 #include <string.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <netdb.h> // gethostbyname()
 #include <arpa/inet.h>
 
@@ -27,10 +32,10 @@ void tcp_forward(int fd1, int fd2)
         FD_SET(fd1, &readfds);
         FD_SET(fd2, &readfds);
 
-        timeout.tv_sec = 1;
+        timeout.tv_sec = 10;
         timeout.tv_usec = 0;
 
-        n = select(maxfd + 1, &readfds, 0, 0, &timeout);
+        n = select(maxfd + 1, &readfds, NULL, NULL, &timeout);
         if (n > 0) {
             memset(buff, 0, BUFF_SIZE);
             if (FD_ISSET(fd1, &readfds)) {

@@ -162,13 +162,11 @@ int attempt(credentials_t * credentials)
     unsigned int ulen, plen;
     char * uname;
     char * passwd;
-    char * plen_ptr;
 
     uname = &credentials->uname;
     ulen = credentials->ulen;
-    plen_ptr = uname + ulen;
-    plen = *plen_ptr;
-    passwd = plen_ptr + 1;
+    plen = *(uname + ulen);
+    passwd = uname + ulen + 1;
 
     LOG_INFO("credentials: ");
     LOG("ulen: %d", ulen);
@@ -323,12 +321,12 @@ int create_server(in_addr_t addr, in_port_t port)
     server_addr.sin_port        = port;
     server_addr.sin_addr.s_addr = addr;
 
-    if (bind(server_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+    if (bind(server_sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
         perror("Socket bind error");
         return 0;
     }
 
-    if (listen(server_sockfd, 5) == -1) {
+    if (listen(server_sockfd, SOMAXCONN) == -1) {
         perror("Socket listen error");
         return 0;
     }

@@ -23,5 +23,5 @@ util.o: util.c util.h
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f server
 	rm -f *.o
+	rm -f server
